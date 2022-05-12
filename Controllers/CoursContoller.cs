@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CourDuSoirBackEnd.Controllers
 {
@@ -25,19 +26,24 @@ namespace CourDuSoirBackEnd.Controllers
                     FileUrl ="bbb"
                 }
             };
+        private readonly DataContext _context;
+        public CoursContoller(DataContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public async Task<ActionResult<List<Cours>>> Get()
         {
 
-            return Ok(coures);
+            return Ok(await _context.Courses.ToListAsync());
 
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Cours>> Get(int id)
         {
-            var cour = coures.Find(h => h.Id == id);
+            var cour = await _context.Courses.FindAsync(id);
             if (cour == null)
                 return BadRequest("Cour n'exixte pas");
 
@@ -48,9 +54,10 @@ namespace CourDuSoirBackEnd.Controllers
 
         [HttpPost]
         public async Task<ActionResult<List<Cours>>> AddCours(Cours cour) 
-        {    
-            coures.Add(cour);
-            return Ok(coures);
+        {
+            _context.Courses.Add(cour);
+            await _context.SaveChangesAsync();
+            return Ok(await _context.Courses.ToListAsync());
 
         }
 
@@ -58,7 +65,7 @@ namespace CourDuSoirBackEnd.Controllers
         [HttpPut]
         public async Task<ActionResult<List<Cours>>> UpdateCours(Cours newCours)
         {
-            var cour = coures.Find(h => h.Id == newCours.Id);
+            var cour = await _context.Courses.FindAsync(newCours.Id);
             if (cour == null)
                 return BadRequest("Cour n'exixte pas");
 
@@ -66,7 +73,9 @@ namespace CourDuSoirBackEnd.Controllers
             cour.CourseName = newCours.CourseName;
             cour.FileUrl = newCours.FileUrl;
 
-            return Ok(coures);
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.Courses.ToListAsync());
 
         }
 
@@ -74,12 +83,14 @@ namespace CourDuSoirBackEnd.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<List<Cours>>> Delete(int id)
         {
-            var cour = coures.Find(h => h.Id == id);
+            var cour = await _context.Courses.FindAsync(id);
             if (cour == null)
                 return BadRequest("Cour n'exixte pas");
 
-            coures.Remove(cour);
-            return Ok(coures);
+             _context.Courses.Remove(cour);
+
+            await _context.SaveChangesAsync();
+            return Ok(await _context.Courses.ToListAsync());
 
         }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CourDuSoirBackEnd.Controllers
 {
@@ -29,19 +30,24 @@ namespace CourDuSoirBackEnd.Controllers
                     NextSessionDate = "11/11/2022"
                 }
             };
+        private readonly DataContext _context;
+        public GroupController(DataContext context)
+        {
+            _context = context;
+        }
 
         [HttpGet]
         public async Task<ActionResult<List<Group>>> Get()
         {
 
-            return Ok(groups);
+            return Ok(await _context.Groups.ToListAsync());
 
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Group>> Get(int id)
         {
-            var group1 = groups.Find(h => h.Id == id);
+            var group1 = await _context.Groups.FindAsync(id);
             if (group1 == null)
                 return BadRequest("Group n'exixte pas");
 
@@ -53,8 +59,9 @@ namespace CourDuSoirBackEnd.Controllers
         [HttpPost]
         public async Task<ActionResult<List<Cours>>> AddGroup(Group group)
         {
-            groups.Add(group);
-            return Ok(groups);
+            _context.Groups.Add(group);
+            await _context.SaveChangesAsync();
+            return Ok(await _context.Groups.ToListAsync());
 
         }
 
@@ -62,7 +69,7 @@ namespace CourDuSoirBackEnd.Controllers
         [HttpPut]
         public async Task<ActionResult<List<Cours>>> UpdateGroup(Group newGroup)
         {
-            var group1 = groups.Find(h => h.Id == newGroup.Id);
+            var group1 = await _context.Groups.FindAsync(newGroup.Id);
             if (group1 == null)
                 return BadRequest("Group n'exixte pas");
 
@@ -71,7 +78,10 @@ namespace CourDuSoirBackEnd.Controllers
             group1.GroupLevel = newGroup.GroupLevel;
             group1.NextSessionDate = newGroup.NextSessionDate;
             group1.GroupName = newGroup.GroupName;
-            return Ok(groups);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.Groups.ToListAsync());
 
         }
 
@@ -79,12 +89,15 @@ namespace CourDuSoirBackEnd.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<List<Cours>>> Delete(int id)
         {
-            var group1 = groups.Find(h => h.Id == id);
+            var group1 = await _context.Groups.FindAsync(id);
             if (group1 == null)
                 return BadRequest("Group n'exixte pas");
 
-            groups.Remove(group1);
-            return Ok(groups);
+            _context.Groups.Remove(group1);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.Groups.ToListAsync());
 
         }
 

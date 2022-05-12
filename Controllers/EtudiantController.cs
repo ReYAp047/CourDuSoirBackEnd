@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace CourDuSoirBackEnd.Controllers
 {
@@ -34,18 +36,25 @@ namespace CourDuSoirBackEnd.Controllers
                 }
             };
 
+        private readonly DataContext _context;
+
+        public EtudiantController(DataContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet]
         public async Task<ActionResult< List<Etudiant> > > Get()
         {
 
-            return Ok(etudiants);
+            return Ok(await _context.Etudiants.ToListAsync());
 
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Etudiant>> Get(int id)
         {
-            var etudiant1 = etudiants.Find(h => h.Id == id);
+            var etudiant1 = await _context.Etudiants.FindAsync(id);
             if (etudiant1 == null)
                 return BadRequest("Etudiant n'exixte pas");
 
@@ -56,15 +65,16 @@ namespace CourDuSoirBackEnd.Controllers
         [HttpPost]
         public async Task<ActionResult<List<Cours>>> AddEtudiant(Etudiant etudiant)
         {
-            etudiants.Add(etudiant);
-            return Ok(etudiants);
+            _context.Etudiants.Add(etudiant);
+            await _context.SaveChangesAsync();
+            return Ok(await _context.Etudiants.ToListAsync());
 
         }
 
         [HttpPut]
         public async Task<ActionResult<List<Etudiant>>> UpdateEtudiant(Etudiant newEtudiant)
         {
-            var etudiant1 = etudiants.Find(h => h.Id == newEtudiant.Id);
+            var etudiant1 = await _context.Etudiants.FindAsync(newEtudiant.Id);
             if (etudiant1 == null)
                 return BadRequest("Etudiant n'exixte pas");
 
@@ -76,19 +86,23 @@ namespace CourDuSoirBackEnd.Controllers
             etudiant1.Payment = newEtudiant.Payment;
             etudiant1.PhoneNumber = newEtudiant.PhoneNumber;
 
-            return Ok(etudiants);
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.Etudiants.ToListAsync());
 
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<List<Etudiant>>> Delete(int id)
         {
-            var etudiant1 = etudiants.Find(h => h.Id == id);
+            var etudiant1 = await _context.Etudiants.FindAsync(id);
             if (etudiant1 == null)
                 return BadRequest("Etudiant n'exixte pas");
 
-            etudiants.Remove(etudiant1);
-            return Ok(etudiants);
+            _context.Etudiants.Remove(etudiant1);
+
+            await _context.SaveChangesAsync();
+            return Ok(await _context.Etudiants.ToListAsync());
 
         }
 
