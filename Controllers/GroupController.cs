@@ -78,6 +78,7 @@ namespace CourDuSoirBackEnd.Controllers
             group1.GroupLevel = newGroup.GroupLevel;
             group1.NextSessionDate = newGroup.NextSessionDate;
             group1.GroupName = newGroup.GroupName;
+            group1.numberOfLearners = newGroup.numberOfLearners;
 
             await _context.SaveChangesAsync();
 
